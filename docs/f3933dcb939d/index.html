@@ -101,7 +101,7 @@
 
   <div class="tabs" id="tabs">
     <button class="tab on" data-role="shorts">Short-form контент-стратег</button>
-    <button class="tab" data-role="youtube">YouTube-продюсер</button>
+    <button class="tab" data-role="youtube">YouTube-продюсер (на паузе)</button>
   </div>
 
   <div class="grid2">
@@ -126,8 +126,8 @@
           </div>
           <div class="field">
             <label>KPI выплачено, ₽/мес <b id="kpiLabel" class="num"></b></label>
-            <input type="range" id="kpiRange" min="0" max="30000" step="5000" />
-            <div class="tiny">Максимум по вакансии — 30 000 ₽</div>
+            <input type="range" id="kpiRange" min="0" max="40000" step="5000" />
+            <div class="tiny" id="kpiHint"></div>
           </div>
         </div>
       </div>
@@ -217,19 +217,21 @@
 
   var DEFAULTS = {
     shorts: {
-      rev: 1000000, fix: 70000, kpi: 30000,
+      rev: 1000000, fix: 60000, kpi: 40000, kpiMax: 40000,
       t1: 1000000, t2: 5000000, r1: 4, r2: 3, r3: 2,
       ramp: 3,
-      fixHint: "по вакансии 70 000",
+      fixHint: "по вакансии 60 000 (30–60 роликов в мес.)",
+      kpiHint: "Максимум 40 000 ₽: по 20 000 ₽ за регистрации и охват",
       extra: [
-        { id: "hookEditor", label: "Монтажёр хуков на аутсорсе, ₽/мес", value: 0, step: 5000, hint: "Ставку уточнить" }
+        { id: "other", label: "Прочие расходы, ₽/мес", value: 0, step: 5000, hint: "Монтирует сам, аутсорс не закладываем" }
       ]
     },
     youtube: {
-      rev: 1000000, fix: 80000, kpi: 30000,
+      rev: 1000000, fix: 80000, kpi: 30000, kpiMax: 30000,
       t1: 1000000, t2: 5000000, r1: 4, r2: 3, r3: 2,
       ramp: 3,
       fixHint: "вилка 70 000–90 000",
+      kpiHint: "Максимум 30 000 ₽",
       extra: [
         { id: "videos", label: "Видео в неделю", value: 2, step: 1 },
         { id: "minutes", label: "Минут на видео у внешнего монтажёра", value: 2, step: 0.5 },
@@ -282,7 +284,7 @@
     var e = {};
     s.extra.forEach(function (f) { e[f.id] = num(f.value); });
     if (role === "youtube") return e.videos * WEEKS_PER_MONTH * e.minutes * e.perMin;
-    return e.hookEditor || 0;
+    return e.other || 0;
   }
 
   function income(R, s) { return s.fix + s.kpi + bonus(R, s); }
@@ -331,7 +333,8 @@
     var s = cur();
     $("rev").value = s.rev; $("revRange").value = Math.min(s.rev, 10000000);
     $("fix").value = s.fix; $("fixHint").textContent = s.fixHint;
-    $("kpiRange").value = s.kpi;
+    $("kpiRange").max = s.kpiMax; $("kpiRange").value = s.kpi;
+    $("kpiHint").textContent = s.kpiHint;
     $("t1").value = s.t1; $("t2").value = s.t2;
     $("r1").value = s.r1; $("r2").value = s.r2; $("r3").value = s.r3;
     $("ramp").value = s.ramp;
